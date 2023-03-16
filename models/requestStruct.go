@@ -2,7 +2,7 @@ package models
 
 import (
 	"encoding/json"
-	"io"
+	"github.com/gin-gonic/gin"
 	"log"
 )
 
@@ -13,10 +13,19 @@ type RequestMessage struct {
 	Mail       string `json:"mail"`
 	Message    string `json:"message"`
 }
+type RequestResponse struct {
+	Success string `json:"success"`
+	Error   string `json:"error"`
+}
 
-func (r *RequestMessage) ParseRequestData(body io.ReadCloser) {
-	err := json.NewDecoder(body).Decode(&r)
+func (r *RequestMessage) ParseRequestData(c *gin.Context) {
+	err := json.NewDecoder(c.Request.Body).Decode(&r)
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func (resp *RequestResponse) Marshal() string {
+	JSONresponse, _ := json.Marshal(resp)
+	return string(JSONresponse)
 }

@@ -6,23 +6,23 @@ import (
 	"mailService/models"
 )
 
-func SendMail(db *sql.DB, message models.RequestMessage) {
+func SendMail(db *sql.DB, message models.RequestMessage) models.RequestResponse {
 	//createClient
 	newClient := models.Client{
-		Name: message.Name,
+		Name: message.ClientName,
 	}
 
 	//get ID
 	var id int
-	idRow := db.QueryRow("SELECT id, answer FROM clients WHERE name = ?", message.Name)
+	idRow := db.QueryRow("SELECT id, answer FROM clients WHERE name = ?", newClient.Name)
 	err := idRow.Scan(&id, &newClient.Answer)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	//get DATA
-	rowTemp := db.QueryRow("SELECT templateReceive FROM templates WHERE id = ?", id)
-	err = rowTemp.Scan(&newClient.TemplateReceive)
+	rowTemp := db.QueryRow("SELECT templateReceive, templateSend FROM templates WHERE id = ?", id)
+	err = rowTemp.Scan(&newClient.TemplateReceive, &newClient.TemplateSend)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,5 +32,5 @@ func SendMail(db *sql.DB, message models.RequestMessage) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	newClient.SendMail()
+	return newClient.SendMail()
 }
