@@ -3,7 +3,6 @@ package models
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 )
@@ -13,7 +12,6 @@ func (c *Client) ParseClient(req *gin.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(c)
 }
 func (c *Client) CreateClient(db *sql.DB) {
 	_, err := db.Exec(`
