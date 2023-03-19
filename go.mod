@@ -3,6 +3,7 @@ module mailService
 go 1.20
 
 require (
+	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.9.0
 	github.com/mattn/go-sqlite3 v1.14.16
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
