@@ -2,19 +2,19 @@ package functions
 
 import (
 	"database/sql"
-	"mailService/models"
+	"mailService/models/mail"
 )
 
 func CreateClient(db *sql.DB) {
-	templates := models.Templates{TemplateSend: "HOLA", TemplateReceive: "MUNDO"}
-	auth := models.Auth{
+	templates := mail.Templates{TemplateSend: "HOLA", TemplateReceive: "MUNDO"}
+	auth := mail.Auth{
 		Sender:   "logicielapplab@gmail.com",
 		Alias:    "Logiciel Applab",
 		Password: "cgmjfmgwjlsnqqku",
 		Host:     "smtp.gmail.com",
 		Port:     587,
 	}
-	newClient := models.Client{
+	newClient := mail.Client{
 		Name:      "Logiciel Applab",
 		Answer:    1,
 		Templates: templates,

@@ -1318,10 +1318,8 @@
     <table id="484" parent="166" name="sqlite_master">
       <System>1</System>
     </table>
-    <table id="485" parent="166" name="sqlite_sequence">
-      <System>1</System>
-    </table>
-    <table id="486" parent="166" name="templates"/>
+    <table id="485" parent="166" name="templates"/>
+    <table id="486" parent="166" name="users"/>
     <column id="487" parent="482" name="id">
       <DasType>integer|0s</DasType>
       <NotNull>1</NotNull>
@@ -1352,7 +1350,6 @@
       <Primary>1</Primary>
     </key>
     <column id="494" parent="483" name="id">
-      <AutoIncrement>1</AutoIncrement>
       <DasType>integer|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -1389,28 +1386,34 @@
       <DasType>TEXT|0s</DasType>
       <Position>5</Position>
     </column>
-    <column id="503" parent="485" name="name">
-      <Position>1</Position>
-    </column>
-    <column id="504" parent="485" name="seq">
-      <Position>2</Position>
-    </column>
-    <column id="505" parent="486" name="id">
+    <column id="503" parent="485" name="id">
       <DasType>integer|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
     </column>
-    <column id="506" parent="486" name="templateReceive">
+    <column id="504" parent="485" name="templateReceive">
       <DasType>text|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="507" parent="486" name="templateSend">
+    <column id="505" parent="485" name="templateSend">
       <DasType>text|0s</DasType>
       <Position>3</Position>
     </column>
-    <key id="508" parent="486">
+    <key id="506" parent="485">
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
+    <column id="507" parent="486" name="id">
+      <DasType>integer|0s</DasType>
+      <Position>1</Position>
+    </column>
+    <column id="508" parent="486" name="user">
+      <DasType>text|0s</DasType>
+      <Position>2</Position>
+    </column>
+    <column id="509" parent="486" name="password">
+      <DasType>text|0s</DasType>
+      <Position>3</Position>
+    </column>
   </database-model>
 </dataSource>

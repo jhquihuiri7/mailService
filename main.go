@@ -2,12 +2,14 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
-	"mailService/functions"
-	"mailService/models"
+	"mailService/models/auth"
+	"mailService/models/mail"
+	"mailService/models/request"
 	"net/http"
 	"os"
 	"time"
@@ -19,21 +21,13 @@ var (
 )
 
 func init() {
+	auth.InitKeys()
 	db, err = sql.Open("sqlite3", "./data/clients.db")
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 func main() {
-
-	//_, err = db.Exec("CREATE TABLE auth(id integer not null primary key, sender text, alias text, password text, host text, port integer)")
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-
-	//functions.CreateClient(db)
-	//request := models.RequestMessage{Name: "Logiciel Applab"}
-	//functions.SendMail(db, request)
 	router := gin.New()
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
@@ -48,21 +42,70 @@ func main() {
 		MaxAge: 12 * time.Hour,
 	}))
 	router.POST("/api/standardMail", StandardMail)
+	router.POST("/api/bulkMail", BulkMail)
 	router.POST("/api/createStandardClient", CreateClient)
+	router.GET("/api/listClients", ListClients)
+	router.POST("/api/deleteClient", DeleteClient)
+	router.POST("/api/updateClient", UpdateClient)
+	router.POST("/api/login", Login)
+	router.GET("/api/validateToken", ValidateToken)
+
 	port := os.Getenv("PORT")
 	if err = http.ListenAndServe(":"+port, router); err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 }
+func Login(c *gin.Context) {
+	var request auth.AuthRequest
+	request.ParseAuth(c.Request.Body)
+	response := request.Login(db)
+	c.Writer.WriteString(response.Marshal())
+}
+func ValidateToken(c *gin.Context) {
+	var request auth.AuthResponse
+	response := request.ValidateToken(c.Request, db)
+	c.Writer.WriteString(response.Marshal())
+}
 func StandardMail(c *gin.Context) {
-	var request models.RequestMessage
-	request.ParseRequestData(c)
-	response := functions.SendMail(db, request)
+	var request request.RequestStandard
+	request.ParseRequestStandardData(c)
+	newClient := mail.Client{
+		Name: request.ClientName,
+	}
+	newClient.GetClient(db)
+	response := newClient.SendStandardMail(request)
+	c.Writer.WriteString(response.Marshal())
+}
+func BulkMail(c *gin.Context) {
+	fmt.Println(c.RemoteIP())
+
+	var request request.RequestBulk
+	request.ParseRequestBulkData(c)
+	newClient := mail.Client{
+		Name: request.ClientName,
+	}
+	newClient.GetClient(db)
+	response := newClient.SendBulkMail(request)
 	c.Writer.WriteString(response.Marshal())
 }
 func CreateClient(c *gin.Context) {
-	var newClient models.Client
+	var newClient mail.Client
 	newClient.ParseClient(c)
 	newClient.CreateClient(db)
+}
+func ListClients(c *gin.Context) {
+	var clients mail.Clients
+	clients.ListClients(db)
+	fmt.Fprintln(c.Writer, clients.List)
+}
+func DeleteClient(c *gin.Context) {
+	var client mail.Client
+	client.ParseClient(c)
+	client.DeleteClient(db)
+}
+func UpdateClient(c *gin.Context) {
+	var client mail.Client
+	client.ParseClient(c)
+	client.UpdateClient(db)
 }
