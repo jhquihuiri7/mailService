@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
-	"mailService/models/auth"
 	"mailService/models/mail"
 	"mailService/models/request"
 	"net/http"
@@ -21,7 +20,6 @@ var (
 )
 
 func init() {
-	auth.InitKeys()
 	db, err = sql.Open("sqlite3", "./data/clients.db")
 	if err != nil {
 		log.Fatal(err)
@@ -47,25 +45,13 @@ func main() {
 	router.GET("/api/listClients", ListClients)
 	router.POST("/api/deleteClient", DeleteClient)
 	router.POST("/api/updateClient", UpdateClient)
-	router.POST("/api/login", Login)
-	router.GET("/api/validateToken", ValidateToken)
+	router.POST("/api/validateDataInput", ValidateDataInput)
 
 	port := os.Getenv("PORT")
 	if err = http.ListenAndServe(":"+port, router); err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
-}
-func Login(c *gin.Context) {
-	var request auth.AuthRequest
-	request.ParseAuth(c.Request.Body)
-	response := request.Login(db)
-	c.Writer.WriteString(response.Marshal())
-}
-func ValidateToken(c *gin.Context) {
-	var request auth.AuthResponse
-	response := request.ValidateToken(c.Request, db)
-	c.Writer.WriteString(response.Marshal())
 }
 func StandardMail(c *gin.Context) {
 	var request request.RequestStandard
@@ -108,4 +94,9 @@ func UpdateClient(c *gin.Context) {
 	var client mail.Client
 	client.ParseClient(c)
 	client.UpdateClient(db)
+}
+func ValidateDataInput(c *gin.Context) {
+	var request request.RequestBulk
+	response := request.ValidateDataInput(c)
+	c.Writer.WriteString(response.Marshal())
 }
