@@ -6,15 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="4d7fc8a3-2de8-48f6-86ed-9295cecba496" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/files/private.pem" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/files/public.pem" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/createClient.go" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/gin-bin.exe" beforeDir="false" afterPath="$PROJECT_DIR$/gin-bin.exe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/auth/authFunctions.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/auth/authStructs.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/mail/mailFunctions.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/mail/mailFunctions.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/bulk.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/models/request/requestStruct.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/request/requestStruct.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -54,7 +50,7 @@
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
     &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Documents/GO/go/src&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/Documents/GO/go/src/chatGTP&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;

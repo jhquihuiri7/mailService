@@ -6,8 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ompluscator/dynamic-struct"
 	"github.com/xuri/excelize/v2"
+	"golang.org/x/exp/slices"
 	"log"
 	"strings"
+	"unicode"
 )
 
 type RequestStandard struct {
@@ -28,8 +30,12 @@ type RequestResponse struct {
 	Error   string `json:"error"`
 }
 type SumarizeResponse struct {
-	Success []interface{} `json:"success"`
-	Error   string        `json:"error"`
+	Success SumData `json:"success"`
+	Error   string  `json:"error"`
+}
+type SumData struct {
+	Data  []interface{} `json:"data"`
+	Limit int           `json:"limit"`
 }
 
 func (r *RequestStandard) ParseRequestStandardData(c *gin.Context) {
@@ -49,23 +55,28 @@ func (r *RequestBulk) ValidateDataInput(c *gin.Context) SumarizeResponse {
 	c.Request.ParseMultipartForm(10 << 20)
 	file, _, err := c.Request.FormFile("data")
 	if err != nil {
-		log.Fatal(err)
-		return response
+		return SumarizeResponse{Error: err.Error()}
 	}
 	defer file.Close()
 	excelFile, err := excelize.OpenReader(file)
 	if err != nil {
-		log.Fatal(err)
-		return response
+		return SumarizeResponse{Error: err.Error()}
 	}
 	data, err := excelFile.GetCols(excelFile.GetSheetName(0))
 	if err != nil {
-		log.Fatal(err)
-		return response
+		return SumarizeResponse{Error: err.Error()}
 	}
 	var colNames []string
+
 	for _, v := range data {
+		response.ValidateLowerUpper(v[0])
+		if response.Error != "" {
+			return response
+		}
 		colNames = append(colNames, v[0])
+	}
+	if !slices.Contains(colNames, "Mail") && !slices.Contains(colNames, "Email") && !slices.Contains(colNames, "Correo") {
+		return SumarizeResponse{Error: "No existe columna Mail, Email o Correo para enviar a destinatarios"}
 	}
 	instance := dynamicstruct.NewStruct()
 	for _, v := range colNames {
@@ -75,10 +86,8 @@ func (r *RequestBulk) ValidateDataInput(c *gin.Context) SumarizeResponse {
 
 	data, err = excelFile.GetRows(excelFile.GetSheetName(0))
 	if err != nil {
-		log.Fatal(err)
-		return response
+		return SumarizeResponse{Error: err.Error()}
 	}
-
 	for i, v := range data {
 		if i < 1 || i >= 10 {
 			continue
@@ -97,8 +106,9 @@ func (r *RequestBulk) ValidateDataInput(c *gin.Context) SumarizeResponse {
 		if err != nil {
 			log.Fatal(err)
 		}
-		response.Success = append(response.Success, dynamicStruct)
+		response.Success.Data = append(response.Success.Data, dynamicStruct)
 	}
+	response.Success.Limit = len(data) - 1
 	return response
 }
 func (resp *SumarizeResponse) Marshal() string {
@@ -108,4 +118,17 @@ func (resp *SumarizeResponse) Marshal() string {
 func (resp *RequestResponse) Marshal() string {
 	JSONresponse, _ := json.Marshal(resp)
 	return string(JSONresponse)
+}
+func (resp *SumarizeResponse) ValidateLowerUpper(s string) {
+	for i, v := range s {
+		if i == 0 {
+			if !unicode.IsUpper(v) {
+				resp.Error = "Verifique que los nombres de columbas empiecen con mayúscula"
+			}
+		} else {
+			if !unicode.IsLower(v) {
+				resp.Error = "Verifique que los nombres de columbas empiecen con mayúscula y luego minúscula"
+			}
+		}
+	}
 }
