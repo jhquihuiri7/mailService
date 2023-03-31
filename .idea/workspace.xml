@@ -6,11 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="4d7fc8a3-2de8-48f6-86ed-9295cecba496" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/functions/createClient.go" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/gin-bin.exe" beforeDir="false" afterPath="$PROJECT_DIR$/gin-bin.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logs/bulk.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/mail/mailFunctions.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/mail/mailFunctions.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/request/requestStruct.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/request/requestStruct.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -67,11 +65,11 @@
       <recent name="D:\Documents\GO\go\src\mailService" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Documents\GO\go\src\mailService\models" />
       <recent name="D:\Documents\GO\go\src\mailService\files" />
       <recent name="D:\Documents\GO\go\src\mailService\files\dd" />
       <recent name="D:\Documents\GO\go\src\mailService\models\mail" />
       <recent name="D:\Documents\GO\go\src\mailService\models\client" />
-      <recent name="D:\Documents\GO\go\src\mailService\models\request" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />

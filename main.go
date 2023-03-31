@@ -15,8 +15,9 @@ import (
 )
 
 var (
-	db  *sql.DB
-	err error
+	db       *sql.DB
+	err      error
+	listBulk request.ListBulk
 )
 
 func init() {
@@ -46,6 +47,7 @@ func main() {
 	router.POST("/api/deleteClient", DeleteClient)
 	router.POST("/api/updateClient", UpdateClient)
 	router.POST("/api/validateDataInput", ValidateDataInput)
+	router.POST("/api/validateBulkTemplate", ValidateBulkTemplate)
 
 	port := os.Getenv("PORT")
 	if err = http.ListenAndServe(":"+port, router); err != nil {
@@ -97,6 +99,19 @@ func UpdateClient(c *gin.Context) {
 }
 func ValidateDataInput(c *gin.Context) {
 	var request request.RequestBulk
+	request.ClientName = c.Request.URL.Query()["clientName"][0]
 	response := request.ValidateDataInput(c)
+	if response.Error == "" {
+		listBulk.List = append(listBulk.List, request)
+	}
+	c.Writer.WriteString(response.Marshal())
+}
+func ValidateBulkTemplate(c *gin.Context) {
+	var request request.RequestTemplate
+	request.ParseRequestBulkTemplate(c)
+	response := request.ValidateTemplate()
+	if response.Error == "" {
+		response = listBulk.GetRequestItem(request)
+	}
 	c.Writer.WriteString(response.Marshal())
 }

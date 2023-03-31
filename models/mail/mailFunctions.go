@@ -38,9 +38,9 @@ func (c *Client) SendBulkMail(req request.RequestBulk) request.RequestResponse {
 	c.TemplateReceive = req.Template
 	wg.Add(len(req.Tos[req.Limits[0]-1 : req.Limits[1]]))
 	for _, v := range req.Tos[req.Limits[0]-1 : req.Limits[1]] {
-		go func(req request.RequestStandard) {
+		go func(req interface{}) {
 			c.ParseTemplate(v)
-			response = c.SendMessage(req.Mail, "")
+			response = c.SendMessage("", "")
 			if response.Error != "" {
 				//nf.WriteString(fmt.Sprintf("- %s\n", req.Mail))
 			}

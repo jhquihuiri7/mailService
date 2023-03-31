@@ -20,10 +20,15 @@ type RequestStandard struct {
 	Message    string `json:"message"`
 }
 type RequestBulk struct {
-	ClientName string            `json:"clientName"`
-	Template   string            `json:"template"`
-	Tos        []RequestStandard `json:"tos"`
-	Limits     []int             `json:"limits"`
+	ClientName string              `json:"clientName"`
+	Template   string              `json:"template"`
+	Tos        []map[string]string `json:"tos"`
+	Limits     []int               `json:"limits"`
+}
+type RequestTemplate struct {
+	ClientName string   `json:"clientName"`
+	Template   string   `json:"template"`
+	Columns    []string `json:"columns"`
 }
 type RequestResponse struct {
 	Success string `json:"success"`
@@ -34,8 +39,13 @@ type SumarizeResponse struct {
 	Error   string  `json:"error"`
 }
 type SumData struct {
-	Data  []interface{} `json:"data"`
-	Limit int           `json:"limit"`
+	Data    []map[string]string `json:"data"`
+	Limit   int                 `json:"limit"`
+	Columns []string            `json:"columns"`
+}
+
+type ListBulk struct {
+	List []RequestBulk
 }
 
 func (r *RequestStandard) ParseRequestStandardData(c *gin.Context) {
@@ -106,9 +116,43 @@ func (r *RequestBulk) ValidateDataInput(c *gin.Context) SumarizeResponse {
 		if err != nil {
 			log.Fatal(err)
 		}
-		response.Success.Data = append(response.Success.Data, dynamicStruct)
+		var result map[string]string
+		err = json.Unmarshal([]byte(rawData), &result)
+		if err != nil {
+			log.Fatal(err)
+		}
+		//response.Success.Data = append(response.Success.Data, dynamicStruct)
+		response.Success.Data = append(response.Success.Data, result)
+		response.Success.Columns = colNames
+		r.Tos = response.Success.Data
 	}
 	response.Success.Limit = len(data) - 1
+	return response
+}
+
+func (r *RequestTemplate) ParseRequestBulkTemplate(c *gin.Context) {
+	err := json.NewDecoder(c.Request.Body).Decode(&r)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+func (r *RequestTemplate) ValidateTemplate() RequestResponse {
+	var response RequestResponse
+	response.Error = "Columna "
+	for _, v := range r.Columns {
+		if v == "Mail" || v == "Email" || v == "Correo" {
+			continue
+		}
+		if !strings.Contains(r.Template, "{{."+v+"}}") {
+			response.Error += v + ","
+		}
+	}
+	if strings.Contains(response.Error, ",") {
+		response.Error = response.Error[:len(response.Error)-1] + " no existen en template ingresado"
+	} else {
+		response.Error = ""
+		response.Success = "Template validado con éxito"
+	}
 	return response
 }
 func (resp *SumarizeResponse) Marshal() string {
@@ -131,4 +175,14 @@ func (resp *SumarizeResponse) ValidateLowerUpper(s string) {
 			}
 		}
 	}
+}
+func (list *ListBulk) GetRequestItem(request RequestTemplate) RequestResponse {
+	for i, v := range list.List {
+		if v.ClientName == request.ClientName {
+			v.Template = request.Template
+			list.List[i] = v
+			return RequestResponse{Success: "Template validado con éxito"}
+		}
+	}
+	return RequestResponse{Error: "No se encontró cliente"}
 }
