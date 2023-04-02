@@ -2,9 +2,7 @@ package request
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/ompluscator/dynamic-struct"
 	"github.com/xuri/excelize/v2"
 	"golang.org/x/exp/slices"
 	"log"
@@ -83,17 +81,11 @@ func (r *RequestBulk) ValidateDataInput(c *gin.Context) SumarizeResponse {
 		if response.Error != "" {
 			return response
 		}
-		colNames = append(colNames, v[0])
+		colNames = append(colNames, strings.ToLower(v[0]))
 	}
-	if !slices.Contains(colNames, "Mail") && !slices.Contains(colNames, "Email") && !slices.Contains(colNames, "Correo") {
+	if !slices.Contains(colNames, "mail") && !slices.Contains(colNames, "email") && !slices.Contains(colNames, "correo") {
 		return SumarizeResponse{Error: "No existe columna Mail, Email o Correo para enviar a destinatarios"}
 	}
-	instance := dynamicstruct.NewStruct()
-	for _, v := range colNames {
-		instance.AddField(v, "", fmt.Sprintf(`json:"%s"`, strings.ToLower(v)))
-	}
-	dynamicStruct := instance.Build().New()
-
 	data, err = excelFile.GetRows(excelFile.GetSheetName(0))
 	if err != nil {
 		return SumarizeResponse{Error: err.Error()}
@@ -112,16 +104,11 @@ func (r *RequestBulk) ValidateDataInput(c *gin.Context) SumarizeResponse {
 			}
 		}
 		rawData += "}"
-		err = json.Unmarshal([]byte(rawData), &dynamicStruct)
-		if err != nil {
-			log.Fatal(err)
-		}
 		var result map[string]string
 		err = json.Unmarshal([]byte(rawData), &result)
 		if err != nil {
 			log.Fatal(err)
 		}
-		//response.Success.Data = append(response.Success.Data, dynamicStruct)
 		response.Success.Data = append(response.Success.Data, result)
 		response.Success.Columns = colNames
 		r.Tos = response.Success.Data
@@ -140,11 +127,12 @@ func (r *RequestTemplate) ValidateTemplate() RequestResponse {
 	var response RequestResponse
 	response.Error = "Columna "
 	for _, v := range r.Columns {
-		if v == "Mail" || v == "Email" || v == "Correo" {
+		v = strings.ToLower(v)
+		if v == "mail" || v == "email" || v == "correo" {
 			continue
 		}
 		if !strings.Contains(r.Template, "{{."+v+"}}") {
-			response.Error += v + ","
+			response.Error += strings.ToLower(v) + ","
 		}
 	}
 	if strings.Contains(response.Error, ",") {
@@ -176,7 +164,7 @@ func (resp *SumarizeResponse) ValidateLowerUpper(s string) {
 		}
 	}
 }
-func (list *ListBulk) GetRequestItem(request RequestTemplate) RequestResponse {
+func (list *ListBulk) GetRequestItemTmp(request RequestTemplate) RequestResponse {
 	for i, v := range list.List {
 		if v.ClientName == request.ClientName {
 			v.Template = request.Template
@@ -185,4 +173,14 @@ func (list *ListBulk) GetRequestItem(request RequestTemplate) RequestResponse {
 		}
 	}
 	return RequestResponse{Error: "No se encontró cliente"}
+}
+func (list *ListBulk) GetRequestItemLimits(request RequestBulk) (RequestBulk, RequestResponse) {
+	for i, v := range list.List {
+		if v.ClientName == request.ClientName {
+			v.Limits = request.Limits
+			list.List[i] = v
+			return list.List[i], RequestResponse{Success: "Template validado con éxito"}
+		}
+	}
+	return RequestBulk{}, RequestResponse{Error: "No se encontró cliente"}
 }

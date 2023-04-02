@@ -66,15 +66,15 @@ func StandardMail(c *gin.Context) {
 	c.Writer.WriteString(response.Marshal())
 }
 func BulkMail(c *gin.Context) {
-	fmt.Println(c.RemoteIP())
-
-	var request request.RequestBulk
-	request.ParseRequestBulkData(c)
+	var req request.RequestBulk
+	var response request.RequestResponse
+	req.ParseRequestBulkData(c)
+	mailRequest, response := listBulk.GetRequestItemLimits(req)
 	newClient := mail.Client{
-		Name: request.ClientName,
+		Name: req.ClientName,
 	}
 	newClient.GetClient(db)
-	response := newClient.SendBulkMail(request)
+	response = newClient.SendBulkMail(mailRequest)
 	c.Writer.WriteString(response.Marshal())
 }
 func CreateClient(c *gin.Context) {
@@ -111,7 +111,7 @@ func ValidateBulkTemplate(c *gin.Context) {
 	request.ParseRequestBulkTemplate(c)
 	response := request.ValidateTemplate()
 	if response.Error == "" {
-		response = listBulk.GetRequestItem(request)
+		response = listBulk.GetRequestItemTmp(request)
 	}
 	c.Writer.WriteString(response.Marshal())
 }

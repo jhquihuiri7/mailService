@@ -37,16 +37,24 @@ func (c *Client) SendBulkMail(req request.RequestBulk) request.RequestResponse {
 	var wg sync.WaitGroup
 	c.TemplateReceive = req.Template
 	wg.Add(len(req.Tos[req.Limits[0]-1 : req.Limits[1]]))
-	for _, v := range req.Tos[req.Limits[0]-1 : req.Limits[1]] {
-		go func(req interface{}) {
-			c.ParseTemplate(v)
-			response = c.SendMessage("", "")
+	for _, val := range req.Tos[req.Limits[0]-1 : req.Limits[1]] {
+		var toColumn string
+		for _, toName := range []string{"correo", "mail", "email"} {
+			_, ok := val[toName]
+			if ok {
+				toColumn = toName
+			}
+		}
+		newClient := c
+		v := val
+		go func(client *Client, req map[string]string, toColumn string) {
+			client.ParseTemplate(v)
+			response = client.SendMessage(v["correo"], "")
 			if response.Error != "" {
 				//nf.WriteString(fmt.Sprintf("- %s\n", req.Mail))
 			}
-			fmt.Println(req)
 			wg.Done()
-		}(v)
+		}(newClient, v, toColumn)
 	}
 	wg.Wait()
 	c.SendMessage(c.Sender, "")
@@ -76,7 +84,6 @@ func (c *Client) ParseTemplate(data interface{}) {
 
 		c.TemplateReceive = tempReceive.String()
 	}
-	fmt.Println(tempReceive.String())
 	if err != nil {
 		log.Fatal(err)
 	}
