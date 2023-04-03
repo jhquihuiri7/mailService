@@ -3,15 +3,14 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
+	"mailService/middleware"
 	"mailService/models/mail"
 	"mailService/models/request"
 	"net/http"
 	"os"
-	"time"
 )
 
 var (
@@ -28,18 +27,7 @@ func init() {
 }
 func main() {
 	router := gin.New()
-	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"PUT", "PATCH", "POST", "GET", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Access-Control-Allow-Origin", "Content-Length", "Content-type"},
-		ExposeHeaders:    []string{"Content-Length", "Content-type"},
-		AllowCredentials: true,
-
-		AllowOriginFunc: func(origin string) bool {
-			return true
-		},
-		MaxAge: 12 * time.Hour,
-	}))
+	router.Use(middleware.CORSMiddleware())
 	router.POST("/api/standardMail", StandardMail)
 	router.POST("/api/bulkMail", BulkMail)
 	router.POST("/api/createStandardClient", CreateClient)
