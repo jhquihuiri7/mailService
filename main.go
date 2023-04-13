@@ -1,11 +1,11 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
+	"mailService/DB"
 	"mailService/middleware"
 	"mailService/models/mail"
 	"mailService/models/request"
@@ -14,16 +14,14 @@ import (
 )
 
 var (
-	db       *sql.DB
 	err      error
 	listBulk request.ListBulk
 )
 
 func init() {
-	db, err = sql.Open("sqlite3", "./data/clients.db")
-	if err != nil {
-		log.Fatal(err)
-	}
+	DB.InitSQLite()
+	DB.InitMongo()
+	DB.InitColletion()
 }
 func main() {
 	router := gin.New()
@@ -41,7 +39,7 @@ func main() {
 	if err = http.ListenAndServe(":"+port, router); err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	defer DB.SQliteDB.Close()
 }
 func StandardMail(c *gin.Context) {
 	var request request.RequestStandard
@@ -49,7 +47,7 @@ func StandardMail(c *gin.Context) {
 	newClient := mail.Client{
 		Name: request.ClientName,
 	}
-	newClient.GetClient(db)
+	newClient.GetClient(DB.SQliteDB)
 	response := newClient.SendStandardMail(request)
 	c.Writer.WriteString(response.Marshal())
 }
@@ -61,29 +59,29 @@ func BulkMail(c *gin.Context) {
 	newClient := mail.Client{
 		Name: req.ClientName,
 	}
-	newClient.GetClient(db)
+	newClient.GetClient(DB.SQliteDB)
 	response = newClient.SendBulkMail(mailRequest)
 	c.Writer.WriteString(response.Marshal())
 }
 func CreateClient(c *gin.Context) {
 	var newClient mail.Client
 	newClient.ParseClient(c)
-	newClient.CreateClient(db)
+	newClient.CreateClient(DB.SQliteDB)
 }
 func ListClients(c *gin.Context) {
 	var clients mail.Clients
-	clients.ListClients(db)
+	clients.ListClients(DB.SQliteDB)
 	fmt.Fprintln(c.Writer, clients.List)
 }
 func DeleteClient(c *gin.Context) {
 	var client mail.Client
 	client.ParseClient(c)
-	client.DeleteClient(db)
+	client.DeleteClient(DB.SQliteDB)
 }
 func UpdateClient(c *gin.Context) {
 	var client mail.Client
 	client.ParseClient(c)
-	client.UpdateClient(db)
+	client.UpdateClient(DB.SQliteDB)
 }
 func ValidateDataInput(c *gin.Context) {
 	var request request.RequestBulk

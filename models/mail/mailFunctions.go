@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"gopkg.in/gomail.v2"
+	"mailService/models/mailStore"
 	"mailService/models/request"
+	"os"
 	"sync"
 	//"fmt"
 	//"gopkg.in/gomail.v2"
@@ -25,15 +27,18 @@ func (c *Client) SendStandardMail(req request.RequestStandard) request.RequestRe
 
 func (c *Client) SendBulkMail(req request.RequestBulk) request.RequestResponse {
 	var response request.RequestResponse
-	//nf, err := os.Create("./logs/bulk.txt")
-	//defer nf.Close()
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//nf.WriteString(fmt.Sprintf("%s %s\n%s %d al %d %s\n\n%s\n",
-	//	"Reporte de correos masivos enviador por", c.Name,
-	//	"------------ Correos entre los números", req.Limits[0], req.Limits[1], "------------",
-	//	"Correos enviados fallidos:"))
+	//nf, err := os.Create("data/bulk.txt")
+	nf, err := os.CreateTemp(os.TempDir(), "bulk*.txt")
+	defer os.Remove(nf.Name())
+	defer nf.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	failedMail := make(chan string, 500)
+	nf.WriteString(fmt.Sprintf("%s %s\n%s %d al %d %s\n\n%s\n",
+		"Reporte de correos masivos enviador por", c.Name,
+		"------------ Correos entre los números", req.Limits[0], req.Limits[1], "------------",
+		"Correos enviados fallidos:"))
 	var wg sync.WaitGroup
 	c.TemplateReceive = req.Template
 	wg.Add(len(req.Tos[req.Limits[0]-1 : req.Limits[1]]))
@@ -43,21 +48,26 @@ func (c *Client) SendBulkMail(req request.RequestBulk) request.RequestResponse {
 			_, ok := val[toName]
 			if ok {
 				toColumn = toName
+				break
 			}
 		}
-		newClient := c
-		v := val
-		go func(client *Client, req map[string]string, toColumn string) {
-			client.ParseTemplate(v)
-			response = client.SendMessage(v["correo"], "")
+		go func(client Client, req map[string]string, toColumn string, failedMail chan string) {
+			client.ParseTemplate(req)
+			mailBack := mailStore.MailStore{Mail: req[toColumn]}
+			mailBack.AddMail(req)
+			response = client.SendMessage(req[toColumn], "")
 			if response.Error != "" {
-				//nf.WriteString(fmt.Sprintf("- %s\n", req.Mail))
+				failedMail <- req[toColumn]
 			}
 			wg.Done()
-		}(newClient, v, toColumn)
+		}(*c, val, toColumn, failedMail)
 	}
 	wg.Wait()
-	c.SendMessage(c.Sender, "")
+	close(failedMail)
+	for chanVal := range failedMail {
+		nf.WriteString(fmt.Sprintf("- %s\n", chanVal))
+	}
+	c.SendMessage(c.Sender, nf.Name())
 	return response
 }
 
