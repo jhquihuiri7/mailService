@@ -8,6 +8,7 @@ import (
 	"mailService/DB"
 	"mailService/middleware"
 	"mailService/models/mail"
+	"mailService/models/pdfReport"
 	"mailService/models/request"
 	"net/http"
 	"os"
@@ -34,12 +35,16 @@ func main() {
 	router.POST("/api/updateClient", UpdateClient)
 	router.POST("/api/validateDataInput", ValidateDataInput)
 	router.POST("/api/validateBulkTemplate", ValidateBulkTemplate)
-
+	router.GET("/prueba", Prueba)
 	port := os.Getenv("PORT")
 	if err = http.ListenAndServe(":"+port, router); err != nil {
 		log.Fatal(err)
 	}
 	defer DB.SQliteDB.Close()
+}
+func Prueba(c *gin.Context) {
+	p := pdfReport.PdfReport{ClientName: "Jhonatan", Limits: []int{23, 89}, ErrorCount: 12}
+	p.GenerateBulkReport()
 }
 func StandardMail(c *gin.Context) {
 	var request request.RequestStandard
@@ -61,6 +66,13 @@ func BulkMail(c *gin.Context) {
 	}
 	newClient.GetClient(DB.SQliteDB)
 	response = newClient.SendBulkMail(mailRequest)
+	var tempList request.ListBulk
+	for _, v := range listBulk.List {
+		if v.ClientName != req.ClientName {
+			tempList.List = append(tempList.List, v)
+		}
+	}
+	listBulk = tempList
 	c.Writer.WriteString(response.Marshal())
 }
 func CreateClient(c *gin.Context) {

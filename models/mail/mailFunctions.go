@@ -4,14 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	"gopkg.in/gomail.v2"
+	"html/template"
+	"log"
 	"mailService/models/mailStore"
+	"mailService/models/pdfReport"
 	"mailService/models/request"
 	"os"
 	"sync"
-	//"fmt"
-	//"gopkg.in/gomail.v2"
-	"html/template"
-	"log"
 )
 
 func (c *Client) SendStandardMail(req request.RequestStandard) request.RequestResponse {
@@ -27,18 +26,12 @@ func (c *Client) SendStandardMail(req request.RequestStandard) request.RequestRe
 
 func (c *Client) SendBulkMail(req request.RequestBulk) request.RequestResponse {
 	var response request.RequestResponse
-	//nf, err := os.Create("data/bulk.txt")
-	nf, err := os.CreateTemp(os.TempDir(), "bulk*.txt")
-	defer os.Remove(nf.Name())
-	defer nf.Close()
-	if err != nil {
-		log.Fatal(err)
+	report := pdfReport.PdfReport{
+		ClientName: req.ClientName,
+		Limits:     req.Limits,
 	}
 	failedMail := make(chan string, 500)
-	nf.WriteString(fmt.Sprintf("%s %s\n%s %d al %d %s\n\n%s\n",
-		"Reporte de correos masivos enviador por", c.Name,
-		"------------ Correos entre los números", req.Limits[0], req.Limits[1], "------------",
-		"Correos enviados fallidos:"))
+
 	var wg sync.WaitGroup
 	c.TemplateReceive = req.Template
 	wg.Add(len(req.Tos[req.Limits[0]-1 : req.Limits[1]]))
@@ -65,8 +58,12 @@ func (c *Client) SendBulkMail(req request.RequestBulk) request.RequestResponse {
 	wg.Wait()
 	close(failedMail)
 	for chanVal := range failedMail {
-		nf.WriteString(fmt.Sprintf("- %s\n", chanVal))
+		report.ErrorMail = append(report.ErrorMail, chanVal)
+		report.ErrorCount++
 	}
+	nf := report.GenerateBulkReport()
+	defer os.Remove(nf.Name())
+	defer nf.Close()
 	c.SendMessage(c.Sender, nf.Name())
 	return response
 }
