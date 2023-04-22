@@ -3,3 +3,4 @@ data/*.db
 files/*.pem
 *.exe
 *.pdf
+*.png

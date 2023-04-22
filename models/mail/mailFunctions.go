@@ -17,9 +17,9 @@ func (c *Client) SendStandardMail(req request.RequestStandard) request.RequestRe
 	var response request.RequestResponse
 	c.ParseTemplate(req)
 
-	response = c.SendMessage(c.Sender, "")
+	response = c.SendMessage(c.Sender, "Nuevo mensaje de cliente", "")
 	if c.Answer == 1 {
-		c.SendMessage(req.Mail, "")
+		c.SendMessage(req.Mail, "Hemos recibido tu correo", "")
 	}
 	return response
 }
@@ -37,7 +37,7 @@ func (c *Client) SendBulkMail(req request.RequestBulk) request.RequestResponse {
 	wg.Add(len(req.Tos[req.Limits[0]-1 : req.Limits[1]]))
 	for _, val := range req.Tos[req.Limits[0]-1 : req.Limits[1]] {
 		var toColumn string
-		for _, toName := range []string{"correo", "mail", "email"} {
+		for _, toName := range []string{"Correo", "Mail", "Email"} {
 			_, ok := val[toName]
 			if ok {
 				toColumn = toName
@@ -45,10 +45,13 @@ func (c *Client) SendBulkMail(req request.RequestBulk) request.RequestResponse {
 			}
 		}
 		go func(client Client, req map[string]string, toColumn string, failedMail chan string) {
+			fmt.Println(req)
 			client.ParseTemplate(req)
 			mailBack := mailStore.MailStore{Mail: req[toColumn]}
 			mailBack.AddMail(req)
-			response = client.SendMessage(req[toColumn], "")
+			fmt.Println("1." + req[toColumn])
+			fmt.Println(client.TemplateReceive)
+			response = client.SendMessage(req[toColumn], "HOLA", "")
 			if response.Error != "" {
 				failedMail <- req[toColumn]
 			}
@@ -64,7 +67,12 @@ func (c *Client) SendBulkMail(req request.RequestBulk) request.RequestResponse {
 	nf := report.GenerateBulkReport()
 	defer os.Remove(nf.Name())
 	defer nf.Close()
-	c.SendMessage(c.Sender, nf.Name())
+	temp, err := os.ReadFile("templates/reportMailTemplate.gohtml")
+	if err != nil {
+		log.Fatal(err)
+	}
+	c.TemplateReceive = string(temp)
+	c.SendMessage(c.Sender, "Reporte de correos masivos enviados", nf.Name())
 	return response
 }
 
@@ -96,11 +104,11 @@ func (c *Client) ParseTemplate(data interface{}) {
 	}
 }
 
-func (c *Client) SendMessage(tos string, attachFile string) request.RequestResponse {
+func (c *Client) SendMessage(tos, subject, attachFile string) request.RequestResponse {
 	msg := gomail.NewMessage()
 	msg.SetHeader("From", fmt.Sprintf("%s <%s>", c.Alias, c.Sender))
 	msg.SetHeader("To", tos)
-	msg.SetHeader("Subject", "Nuevo Mensaje de Cliente")
+	msg.SetHeader("Subject", subject)
 	msg.SetBody("text/html", c.TemplateReceive)
 	if attachFile != "" {
 		msg.Attach(attachFile)

@@ -22,11 +22,11 @@ type PdfReport struct {
 
 func (p *PdfReport) GenerateChart() *os.File {
 	plt := plot.New()
-	pie1, err := piechart.NewPieChart(plotter.Values{float64(p.Limits[1] - p.Limits[0] - p.ErrorCount)})
+	pie1, err := piechart.NewPieChart(plotter.Values{float64(p.Limits[1] - (p.Limits[0] - 1) - p.ErrorCount)})
 	if err != nil {
 		log.Fatal(err)
 	}
-	pie1.Total = float64(p.Limits[1] - p.Limits[0])
+	pie1.Total = float64(p.Limits[1] - (p.Limits[0] - 1))
 	pie1.Labels.Nominal = []string{"Enviados"}
 	pie1.Labels.Values.Show = true
 	pie1.Labels.Values.Percentage = true
@@ -35,8 +35,8 @@ func (p *PdfReport) GenerateChart() *os.File {
 	if err != nil {
 		log.Fatal(err)
 	}
-	pie2.Offset.Value = float64(p.Limits[1] - p.Limits[0] - p.ErrorCount)
-	pie2.Total = float64(p.Limits[1] - p.Limits[0])
+	pie2.Offset.Value = float64(p.Limits[1] - (p.Limits[0] - 1) - p.ErrorCount)
+	pie2.Total = float64(p.Limits[1] - (p.Limits[0] - 1))
 	pie2.Labels.Nominal = []string{"No enviados"}
 	pie2.Labels.Values.Show = true
 	pie2.Labels.Values.Percentage = true
@@ -47,7 +47,7 @@ func (p *PdfReport) GenerateChart() *os.File {
 	plt.Title.TextStyle.Font.Size = 20
 	plt.Title.Padding = -50
 
-	plt.Legend.Add(fmt.Sprintf("%s: %d", "Correos enviados con éxito", p.Limits[1]-p.Limits[0]-p.ErrorCount), pie1)
+	plt.Legend.Add(fmt.Sprintf("%s: %d", "Correos enviados con éxito", p.Limits[1]-(p.Limits[0]-1)-p.ErrorCount), pie1)
 	plt.Legend.Add(fmt.Sprintf("%s: %d", "Correos enviados fallidos", p.ErrorCount), pie2)
 	plt.Add(pie1, pie2)
 	nf, err := os.Create("reportPlot.png")

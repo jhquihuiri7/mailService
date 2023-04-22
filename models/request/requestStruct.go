@@ -98,7 +98,7 @@ func (r *RequestBulk) ValidateDataInput(c *gin.Context) SumarizeResponse {
 		lenData := len(v)
 		for index, val := range v {
 
-			rawData += "\"" + strings.ToLower(colNames[index]) + "\":\"" + val + "\","
+			rawData += "\"" + strings.ToUpper(colNames[index][:1]) + strings.ToLower(colNames[index][1:]) + "\":\"" + val + "\","
 			if index == lenData-1 {
 				rawData = rawData[:len(rawData)-1]
 			}
@@ -131,6 +131,7 @@ func (r *RequestTemplate) ValidateTemplate() RequestResponse {
 		if v == "mail" || v == "email" || v == "correo" {
 			continue
 		}
+		v = strings.ToUpper(v[:1]) + v[1:]
 		if !strings.Contains(r.Template, "{{."+v+"}}") {
 			response.Error += strings.ToLower(v) + ","
 		}
