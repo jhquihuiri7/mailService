@@ -109,7 +109,12 @@ func (c *Client) SendMessage(tos, subject, attachFile string) request.RequestRes
 	msg.SetHeader("From", fmt.Sprintf("%s <%s>", c.Alias, c.Sender))
 	msg.SetHeader("To", tos)
 	msg.SetHeader("Subject", subject)
-	msg.SetBody("text/html", c.TemplateReceive)
+	if tos == c.Sender {
+		msg.SetBody("text/html", c.TemplateReceive)
+	} else {
+		msg.SetBody("text/html", c.TemplateSend)
+	}
+
 	if attachFile != "" {
 		msg.Attach(attachFile)
 	}

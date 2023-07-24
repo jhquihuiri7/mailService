@@ -15,7 +15,7 @@ type Templates struct {
 	TemplateSend    string `json:"templateSend"`
 }
 type Auth struct {
-	Sender   string `json:"from"`
+	Sender   string `json:"sender"`
 	Alias    string `json:"alias"`
 	Password string `json:"password"`
 	Host     string `json:"host"`

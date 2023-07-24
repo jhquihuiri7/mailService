@@ -20,8 +20,6 @@ var (
 
 func init() {
 	DB.InitSQLite()
-	DB.InitMongo()
-	DB.InitColletion()
 }
 func main() {
 	router := gin.New()
