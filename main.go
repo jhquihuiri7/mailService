@@ -31,8 +31,8 @@ func main() {
 	router.POST("/api/updateClient", UpdateClient)
 	router.POST("/api/validateDataInput", ValidateDataInput)
 	router.POST("/api/validateBulkTemplate", ValidateBulkTemplate)
-	//port := os.Getenv("PORT")
-	if err = http.ListenAndServe(":8080", router); err != nil {
+	port := os.Getenv("PORT")
+	if err = http.ListenAndServe(":"+port, router); err != nil {
 		log.Fatal(err)
 	}
 	defer DB.SQliteDB.Close()
