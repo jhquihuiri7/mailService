@@ -10,6 +10,7 @@ import (
 	"mailService/models/mail"
 	"mailService/models/request"
 	"net/http"
+	"os"
 )
 
 var (
