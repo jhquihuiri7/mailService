@@ -5,3 +5,5 @@ files/*.pem
 *.exe
 *.pdf
 *.png
+gin-bin
+gin-bin.exe

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataSource name="MailServiceDB">
-  <database-model serializer="dbm" dbms="SQLITE" family-id="SQLITE" format-version="4.48">
+  <database-model serializer="dbm" dbms="SQLITE" family-id="SQLITE" format-version="4.51">
     <root id="1">
-      <ServerVersion>3.40.1</ServerVersion>
+      <ServerVersion>3.43.0</ServerVersion>
     </root>
     <collation id="2" parent="1" name="BINARY"/>
     <collation id="3" parent="1" name="NOCASE"/>
@@ -435,6 +435,7 @@
     <routine id="173" parent="1" name="fts5"/>
     <schema id="174" parent="1" name="main">
       <Current>1</Current>
+      <LastIntrospectionLocalTimestamp>2024-01-24.11:31:20</LastIntrospectionLocalTimestamp>
     </schema>
     <argument id="175" parent="16">
       <ArgumentDirection>R</ArgumentDirection>
